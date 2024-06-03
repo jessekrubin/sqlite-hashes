@@ -37,6 +37,9 @@ hex = ["dep:hex"]
 # Enable aggregate functions
 aggregate = []
 #
+# Enable int hashing representations
+int = []
+#
 # Enable window functions in addition to aggregate functions. Uses bundled SQLite. Not supported with loadable extension.
 window = ["aggregate", "rusqlite/bundled", "rusqlite/window"]
 # "rusqlite/bundled", "rusqlite/modern_sqlite"

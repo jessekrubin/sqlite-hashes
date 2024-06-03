@@ -52,6 +52,23 @@ impl<T: Digest + Clone> HashState<T> {
     }
 
     #[inline]
+    #[cfg(all(feature = "window", feature = "int"))]
+    pub fn calc_int(&self) -> Option<i64> {
+        match self {
+            Self::Created => None,
+            Self::Started => Some(0),
+            Self::HasValues(hasher) => Some(i64::from_be_bytes(
+                hasher
+                    .clone()
+                    .finalize()
+                    .to_vec()
+                    .try_into()
+                    .unwrap_or_default(),
+            )),
+        }
+    }
+
+    #[inline]
     pub fn finalize(self) -> Option<Vec<u8>> {
         match self {
             Self::Created | Self::Started => None,
@@ -66,6 +83,22 @@ impl<T: Digest + Clone> HashState<T> {
             Self::Created => None,
             Self::Started => Some(String::new()),
             Self::HasValues(hasher) => Some(hasher.finalize().to_vec().encode_hex_upper()),
+        }
+    }
+
+    #[inline]
+    #[cfg(feature = "int")]
+    pub fn finalize_int(self) -> Option<i64> {
+        match self {
+            Self::Created => None,
+            Self::Started => Some(0),
+            Self::HasValues(hasher) => Some(
+                hasher
+                    .finalize()
+                    .to_vec()
+                    .iter()
+                    .fold(0, |acc, &x| acc * 256 + x as i64),
+            ),
         }
     }
 }

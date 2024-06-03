@@ -86,6 +86,22 @@ pub(crate) fn create_hash_fn<T: NamedDigest + Clone + UnwindSafe + RefUnwindSafe
         })?;
     }
 
+    #[cfg(feature = "int")]
+    {
+        // if hash is int-able create int fn
+        if T::output_size() <= 8 {
+            let fn_name = format!("{fn_name}_int");
+            create_scalar_function(conn, &fn_name, |c| {
+                hash_fn::<T>(
+                    c,
+                    #[cfg(feature = "trace")]
+                    "_int",
+                )
+                .map(HashState::finalize_int)
+            })?;
+        }
+    }
+
     #[cfg(feature = "aggregate")]
     {
         let fn_name = format!("{fn_name}_concat");
